@@ -6,6 +6,9 @@ import AppLoading from 'expo-app-loading';
 import * as Font from "expo-font";
 import { FlatList } from 'react-native-gesture-handler';
 import StoryCard from "./StoryCard";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 let stories = require("./temp.json")
 
@@ -38,7 +41,7 @@ export default class Feed extends Component {
 
     render() {
         if(!this.state.fontsLoaded){
-            return <AppLoading/>
+            SplashScreen.hideAsync();
         } else {
         return (
             <View style={styles.container}>
