@@ -34,7 +34,7 @@ export default class Feed extends Component {
     }
 
     renderItem = ({item: story}) => {
-        return <StoryCard story = {story}/>
+        return <StoryCard story = {story} navigation={this.props.navigation}/>
     }
 
     keyExtractor = (item, index) => index.toString();
