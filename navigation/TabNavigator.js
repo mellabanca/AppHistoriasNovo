@@ -13,7 +13,8 @@ export default class BottomTabNavigator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      light_theme: true
+      light_theme: true,
+      isUpdated: false
     };
   }
 
@@ -31,6 +32,22 @@ export default class BottomTabNavigator extends Component {
         this.setState({ light_theme: theme === "light" });
       });
   };
+
+  changeUpdated = () => {
+    this.setState({isUpdated: true})
+  }
+
+  removeUpdated = () => {
+    this.setState({isUpdated: false})
+  }
+
+  renderFeed = (props) => {
+    return <Feed setUpdateToFalse={this.removeUpdated}{...props}/>
+  }
+
+  renderStory = (props) => {
+    return <CreateStory setUpdateToTrue={this.removeUpdated}{...props}/>
+  }
 
   render() {
     return (
@@ -58,8 +75,8 @@ export default class BottomTabNavigator extends Component {
         activeColor={"#ee8249"}
         inactiveColor={"gray"}
       >
-        <Tab.Screen name="Feed" component={Feed} />
-        <Tab.Screen name="Criar História" component={CreateStory} />
+        <Tab.Screen name="Feed" component={this.renderFeed} options={{unmountOnBlur: true}}/>
+        <Tab.Screen name="Criar História" component={this.renderStory} options={{unmountOnBlur: true}}/>
       </Tab.Navigator>
     );
   }

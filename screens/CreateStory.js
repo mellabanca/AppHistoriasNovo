@@ -9,13 +9,16 @@ import {
   Image,
   ScrollView,
   TextInput,
-  Dimensions
+  Dimensions,
+  Button,
+  Alert
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { RFValue } from "react-native-responsive-fontsize";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import firebase from "firebase";
+import moment from "moment";
 import * as SplashScreen from "expo-splash-screen";
 
 let customFonts = {
@@ -29,7 +32,9 @@ export default class CreateStory extends Component {
       fontsLoaded: false,
       previewImage: "image_1",
       light_theme: true,
-      dropdownHeight: 40
+      dropdownHeight: 40,
+      authorF: "",
+      authorL: "",
     };
   }
 
@@ -50,9 +55,41 @@ export default class CreateStory extends Component {
       .ref("/users/" + firebase.auth().currentUser.uid)
       .on("value", snapshot => {
         theme = snapshot.val().current_theme;
-        this.setState({ light_theme: theme === "light" });
+        var authorFName = snapshot.val().first_name
+        var authorLName = snapshot.val().last_name
+        this.setState({ light_theme: theme === "light",
+                        authorF: authorFName,
+                        authorL: authorLName });
       });
   };
+
+  async addStory(){
+    if(this.state.title && this.state.description &&
+       this.state.story && this.state.moral){
+        let storyData = {
+          preview_image: this.state.previewImage,
+          title: this.state.title,
+          description: this.state.description,
+          story: this.state.story,
+          moral: this.state.moral,
+          author: `${this.state.authorF} ${this.state.authorL}`,
+          created_on: new Date(),
+          author_uid: firebase.auth().currentUser.uid,
+          likes: 0
+        }
+        await firebase
+                      .database()
+                      .ref("/posts/"+(Math.random().toString(36).slice(2)))
+                      .set(storyData)
+                      .then(function(snapshot){})
+        this.props.setUpdateToTrue()
+        this.props.navigation.navigate("Feed")
+    } else {
+      Alert.alert("Erro","Todos os campos são obrigatórios!",
+                  [{text:"Ok", onPress: ()=> console.log("Ok pressionado")}],
+                   {cancelable: false})
+    }
+  }
 
   render() {
     if (!this.state.fontsLoaded) {
@@ -206,6 +243,12 @@ export default class CreateStory extends Component {
                   }
                 />
               </View>
+              <View style={styles.submitButton}>
+                <Button onPress={()=>this.addStory()}
+                        title="Enviar"
+                        color="#841584"
+                />
+              </View>
             </ScrollView>
           </View>
           <View style={{ flex: 0.08 }} />
@@ -298,5 +341,10 @@ const styles = StyleSheet.create({
   inputTextBig: {
     textAlignVertical: "top",
     padding: RFValue(5)
+  },
+  submitButton: {
+    marginTop: RFValue(20),
+    justifyContent: "center",
+    alignItems: "center"
   }
 });

@@ -1,38 +1,32 @@
 import React, { Component } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  Platform,
-  StatusBar,
-  Image,
-  ScrollView,
-  Dimensions
-} from "react-native";
+import {    View,    Text,    StyleSheet,    SafeAreaView,    Platform,    StatusBar,    Image,    ScrollView,    Dimensions,
+TouchableOpacity} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { RFValue } from "react-native-responsive-fontsize";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import * as Speech from "expo-speech";
-import * as SplashScreen from "expo-splash-screen";
+
 import AppLoading from "expo-app-loading";
+import * as SplashScreen from 'expo-splash-screen';
 import * as Font from "expo-font";
+import * as Speech from "expo-speech";
 import firebase from "firebase";
+import StoryCard from "./StoryCard";
+SplashScreen.preventAutoHideAsync();
 
 let customFonts = {
   "Bubblegum-Sans": require("../assets/fonts/BubblegumSans-Regular.ttf")
 };
 
 export default class StoryScreen extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      fontsLoaded: false,
-      speakerColor: "gray",
-      speakerIcon: "volume-high-outline",
-      light_theme: true
-    };
-  }
+    constructor(props) {
+        super(props);
+        this.state = {
+            fontsLoaded: false,
+            speakerColor: "gray",
+            speakerIcon: "volume-high-outline",
+            light_theme: true,
+            story: this.props.route.params.story,
+        };
+    }
 
   async _loadFontsAsync() {
     await Font.loadAsync(customFonts);
@@ -56,102 +50,72 @@ export default class StoryScreen extends Component {
   };
 
   async initiateTTS(title,author,story,moral){
-    const current_color = this.state.speakerColor;
-    this.setState({
-    speakerColor: current_color === "gray" ? "#ee8219" : "gray" 
-    })
-    if(current_color === "gray"){
-      Speech.speak(`${title}, by ${author}`);
-      Speech.speak(story);
-      Speech.speak("A moral da história é!");
-      Speech.speak(moral);
-    } else {
-      Speech.stop();
+      const current_color = this.state.speakerColor;
+      this.setState({
+      speakerColor: current_color === "gray" ? "#ee8219" : "gray" 
+      })
+      if(current_color === "gray"){
+        Speech.speak(`${title}, by ${author}`);
+        Speech.speak(story);
+        Speech.speak("A moral da história é!");
+        Speech.speak(moral);
+      } else {
+        Speech.stop();
+      }
     }
-  }
 
-  render() {
-    if (!this.props.route.params) {
-      this.props.navigation.navigate("Home");
-    } else if (!this.state.fontsLoaded) {
-        SplashScreen.hideAsync();
-    } else {
-      return (
-        <View
-          style={
-            this.state.light_theme ? styles.containerLight : styles.container
-          }
-        >
-          <SafeAreaView style={styles.droidSafeArea} />
-          <View style={styles.appTitle}>
-            <View style={styles.appIcon}>
-              <Image
-                source={require("../assets/logo.png")}
-                style={styles.iconImage}
-              ></Image>
-            </View>
-            <View style={styles.appTitleTextContainer}>
-              <Text
-                style={
-                  this.state.light_theme
-                    ? styles.appTitleTextLight
-                    : styles.appTitleText
-                }
-              >
+render() {
+        if (!this.props.route.params) {
+            this.props.navigation.navigate("Home");
+        } else if (!this.state.fontsLoaded) {
+            SplashScreen.hideAsync();
+        } else {
+          let preview_images = {
+        image_1: require("../assets/story_image_1.png"),
+        image_2: require("../assets/story_image_2.png"),
+        image_3: require("../assets/story_image_3.png"),
+        image_4: require("../assets/story_image_4.png"),
+        image_5: require("../assets/story_image_5.png")
+      };
+        return (
+        <View style={this.state.light_theme ? styles.containerLight : styles.container}>
+         <SafeAreaView style={styles.droidSafeArea} />
+            <View style={styles.appTitle}>
+              <View style={styles.appIcon}>
+                <Image source={require("../assets/logo.png")}
+                        style={styles.iconImage}></Image>
+              </View>
+              <View style={styles.appTitleTextContainer}>
+              <Text style={this.state.light_theme ? styles.appTitleTextLight : styles.appTitleText}>
                 App Narração de Histórias
               </Text>
             </View>
           </View>
           <View style={styles.storyContainer}>
-            <ScrollView
-              style={
-                this.state.light_theme
-                  ? styles.storyCardLight
-                  : styles.storyCard
-              }
-            >
-              <Image
-                source={require("../assets/story_image_1.png")}
-                style={styles.image}
-              ></Image>
+            <ScrollView style={this.state.light_theme ? styles.storyCardLight : styles.storyCard}>
+              <Image source={preview_images[this.state.story.preview_image]}
+                     style={styles.image}></Image>
               <View style={styles.dataContainer}>
                 <View style={styles.titleTextContainer}>
-                  <Text
-                    style={
-                      this.state.light_theme
-                        ? styles.storyTitleTextLight
-                        : styles.storyTitleText
-                    }
-                  >
-                    {this.props.route.params.story.title}
+                  <Text style={this.state.light_theme ? styles.storyTitleTextLight : styles.storyTitleText}>
+                    {this.state.story.title}
+                  </Text>
+                  <Text style={this.state.light_theme ? styles.storyAuthorTextLight : styles.storyAuthorText}>
+                    {this.state.story.author}
                   </Text>
                   <Text
-                    style={
-                      this.state.light_theme
-                        ? styles.storyAuthorTextLight
-                        : styles.storyAuthorText
-                    }
-                  >
-                    {this.props.route.params.story.author}
-                  </Text>
-                  <Text
-                    style={
-                      this.state.light_theme
-                        ? styles.storyAuthorTextLight
-                        : styles.storyAuthorText
-                    }
-                  >
-                    {this.props.route.params.story.created_on}
+                    style={this.state.light_theme ? styles.storyAuthorTextLight : styles.storyAuthorText}>
+                    {this.state.story.created_on}
                   </Text>
                 </View>
                 <View style={styles.iconContainer}>
                   <TouchableOpacity
                     onPress={() =>
                       this.initiateTTS(
-                        this.props.route.params.story.title,
-                        this.props.route.params.story.author,
-                        this.props.route.params.story.story,
-                        this.props.route.params.story.moral
+                        this.state.story.title,
+                        this.state.story.author,
+                        this.state.story.story,
+                        this.state.story.moral,
                       )
                     }
                   >
@@ -166,22 +130,11 @@ export default class StoryScreen extends Component {
               </View>
               <View style={styles.storyTextContainer}>
                 <Text
-                  style={
-                    this.state.light_theme
-                      ? styles.storyTextLight
-                      : styles.storyText
-                  }
-                >
-                  {this.props.route.params.story.story}
+                  style={this.state.light_theme ? styles.storyTextLight : styles.storyText}>
+                  {this.state.story.story}
                 </Text>
-                <Text
-                  style={
-                    this.state.light_theme
-                      ? styles.moralTextLight
-                      : styles.moralText
-                  }
-                >
-                  Moral da História - {this.props.route.params.story.moral}
+                <Text style={this.state.light_theme ? styles.moralTextLight : styles.moralText}>
+                  Moral da História - {this.state.story.moral}
                 </Text>
               </View>
               <View style={styles.actionContainer}>
@@ -189,18 +142,9 @@ export default class StoryScreen extends Component {
                   <Ionicons
                     name={"heart"}
                     size={RFValue(30)}
-                    color={this.state.light_theme ? "black" : "white"}
+                    color={this.state.light_theme ? "#15193c" : "white"}
                   />
-
-                  <Text
-                    style={
-                      this.state.light_theme
-                        ? styles.likeTextLight
-                        : styles.likeText
-                    }
-                  >
-                    12k
-                  </Text>
+                  <Text style={this.state.light_theme ? styles.likeTextLight : styles.likeText}>12k</Text>
                 </View>
               </View>
             </ScrollView>
@@ -243,12 +187,12 @@ const styles = StyleSheet.create({
   },
   appTitleText: {
     color: "white",
-    fontSize: RFValue(28),
+    fontSize: RFValue(20),
     fontFamily: "Bubblegum-Sans"
   },
   appTitleTextLight: {
-    color: "black",
-    fontSize: RFValue(28),
+    color: "#15193c",
+    fontSize: RFValue(20),
     fontFamily: "Bubblegum-Sans"
   },
   storyContainer: {
@@ -295,7 +239,7 @@ const styles = StyleSheet.create({
   storyTitleTextLight: {
     fontFamily: "Bubblegum-Sans",
     fontSize: RFValue(25),
-    color: "black"
+    color: "#15193c"
   },
   storyAuthorText: {
     fontFamily: "Bubblegum-Sans",
@@ -305,7 +249,7 @@ const styles = StyleSheet.create({
   storyAuthorTextLight: {
     fontFamily: "Bubblegum-Sans",
     fontSize: RFValue(18),
-    color: "black"
+    color: "#15193c"
   },
   iconContainer: {
     flex: 0.2
@@ -321,7 +265,7 @@ const styles = StyleSheet.create({
   storyTextLight: {
     fontFamily: "Bubblegum-Sans",
     fontSize: RFValue(15),
-    color: "black"
+    color: "#15193c"
   },
   moralText: {
     fontFamily: "Bubblegum-Sans",
@@ -331,7 +275,7 @@ const styles = StyleSheet.create({
   moralTextLight: {
     fontFamily: "Bubblegum-Sans",
     fontSize: RFValue(20),
-    color: "black"
+    color: "#15193c"
   },
   actionContainer: {
     justifyContent: "center",

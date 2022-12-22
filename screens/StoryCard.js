@@ -28,7 +28,9 @@ export default class StoryCard extends Component {
     super(props);
     this.state = {
       fontsLoaded: false,
-      light_theme: true
+      light_theme: true,
+      story_id: this.props.story.key,
+      story_data: this.props.story.value
     };
   }
 
@@ -55,17 +57,25 @@ export default class StoryCard extends Component {
 
   //render do arquivo StoryCard
   render() {
+    var story = this.state.story_data;
     if (!this.state.fontsLoaded) {
       SplashScreen.hideAsync();
     } else {
+        let images = {
+        image_1: require("../assets/story_image_1.png"),
+        image_2: require("../assets/story_image_2.png"),
+        image_3: require("../assets/story_image_3.png"),
+        image_4: require("../assets/story_image_4.png"),
+        image_5: require("../assets/story_image_5.png")
+      }
       return (
         <TouchableOpacity style={styles.container}
                           onPress={()=>this.props.navigation.navigate(
-                            "Tela de Histórias", {story: this.props.story}
+                            "Tela de Histórias", {story: this.state.story_data}
                           )}>
           <SafeAreaView style={styles.droidSafeArea}/>
             <View style={this.state.light_theme ? styles.cardContainerLight : styles.cardContainer}>
-                <Image source={require("../assets/story_image_1.png")}
+              <Image source={images[story.preview_image]}
                        style={{
                         resizeMode:"contain",
                         width: Dimensions.get("window").width-45,
@@ -76,18 +86,18 @@ export default class StoryCard extends Component {
                 <View style={styles.titleTextContainer}>
                   <View style={styles.storyTitle}>
                     <Text style={this.state.light_theme ? styles.storyTitleTextLight : styles.storyTitleText}>
-                    {this.props.story.title}
+                    {story.title}
                     </Text>
                   </View>
                   <View style={styles.storyAuthor}>
                     <Text style={this.state.light_theme ? styles.storyAuthorTextLight : styles.storyAuthorText}>
-                      {this.props.story.author}
+                      {story.author}
                     </Text>
                   </View>
                 </View>
               </View>
                 <Text style={this.state.light_theme ? styles.descriptionTextLight : styles.descriptionText}>
-                {this.props.story.description}
+                  {story.description}
                 </Text>
               <View style={styles.actionContainer}>
                 <View style={styles.likeButton}>
