@@ -25,6 +25,9 @@ export default class StoryScreen extends Component {
             speakerIcon: "volume-high-outline",
             light_theme: true,
             story: this.props.route.params.story,
+            likes: this.props.route.params.story.likes,
+            story_id: this.props.route.params.storyId,
+            is_liked: false
         };
     }
 
@@ -61,6 +64,30 @@ export default class StoryScreen extends Component {
         Speech.speak(moral);
       } else {
         Speech.stop();
+      }
+    }
+
+    likeAction = () => {
+      if(this.state.is_liked){
+        firebase.database()
+                .ref("posts")
+                .child(this.state.story_id)
+                .child("likes")
+                .set(firebase.database.ServerValue.increment(-1))
+                this.setState({
+                  likes: (this.state.likes -= 1),
+                  is_liked: false
+                })
+      } else {
+        firebase.database()
+                .ref("posts")
+                .child(this.state.story_id)
+                .child("likes")
+                .set(firebase.database.ServerValue.increment(1))
+                this.setState({
+                  likes: (this.state.likes += 1),
+                  is_liked: true
+                })
       }
     }
 
@@ -138,14 +165,15 @@ render() {
                 </Text>
               </View>
               <View style={styles.actionContainer}>
-                <View style={styles.likeButton}>
+                <TouchableOpacity onPress={()=>this.likeAction()}
+                                  style={this.state.is_liked ? styles.likeButtonLiked : styles.likeButtonDisliked}>
                   <Ionicons
                     name={"heart"}
                     size={RFValue(30)}
                     color={this.state.light_theme ? "#15193c" : "white"}
                   />
-                  <Text style={this.state.light_theme ? styles.likeTextLight : styles.likeText}>12k</Text>
-                </View>
+                  <Text style={this.state.light_theme ? styles.likeTextLight : styles.likeText}>{this.state.likes}</Text>
+                </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
@@ -282,14 +310,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: RFValue(10)
   },
-  likeButton: {
-    width: RFValue(160),
-    height: RFValue(40),
-    flexDirection: "row",
+  likeButtonLiked: {
     backgroundColor: "#eb3948",
-    justifyContent: "center",
+    borderRadius: 30,
+    width: 160,
+    height: 40,
+    flexDirection: "row",
+    paddingLeft: 25,
     alignItems: "center",
-    borderRadius: RFValue(30)
+  },
+  likeButtonDisliked: {
+    borderColor: "#eb3948",
+    borderRadius: 30,
+    borderWidth: 2,
+    width: 160,
+    height: 40,
+    flexDirection: "row",
+    paddingLeft: 25,
+    alignItems: "center",
   },
   likeText: {
     color: "white",
